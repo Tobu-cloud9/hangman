@@ -4,7 +4,6 @@
 #include <string>
 #include <regex>
 #include <vector>
-#define MAX 100
 
 //数値をアルファベットに置き換える
 std::string replaceA(std::string Formula, std::vector<std::string> &stuckA) {
@@ -20,9 +19,28 @@ std::string replaceA(std::string Formula, std::vector<std::string> &stuckA) {
 	return std::regex_replace(Formula, check, "A");
 }
 
+//数式を一文字ずつに分割
+void parseOne(std::string Formula, std::vector<std::string>& answer) {
+	for (int i = 0; i < Formula.size(); i++) {
+		std::string num = Formula.substr(i, 1);
+		answer.push_back(num);
+	}
+}
+
+//アルファベットを数字に変更
+void replaceNumber(std::vector<std::string>& answer, std::vector<std::string>& stuckA) {
+	for (int i = 0; i < answer.size(); i++) {
+		if (answer[i] == "A") {
+			answer[i] = stuckA[0];
+			stuckA.erase(stuckA.begin());
+		}
+	}
+}
+
+//分割する関数
 bool parse(std::string Formula) {
-	std::string answer[MAX] = {};
 	std::vector<std::string> stuckA = {};
+	std::vector<std::string> answer = {};
 
 	//入力された数式がすべて半角文字であるかどうか
 	try {
@@ -39,22 +57,19 @@ bool parse(std::string Formula) {
 	}
 	catch (char* e) { std::cout << "Exception : " << e << "\n"; return false; }
 
+	//数値をアルファベットに置き換える
 	Formula = replaceA(Formula, stuckA);
 	
-	for (int i = 0; i < Formula.size(); i++) {
-		answer[i] = Formula[i];
-	}
+	//数式を一文字ずつに分割
+	parseOne(Formula, answer);
 
-	for (int i = 0; i < MAX; i++) {
-		if (answer[i] == "A") {
-			answer[i] = stuckA[0];
-			stuckA.erase(stuckA.begin());
-		}
-	}
+	//アルファベットを数字に変更
+	replaceNumber(answer, stuckA);
 
-	for (int i = 0; i < MAX; i++) {
-		std::cout << answer[i] << "\n";
-		if (answer[i] == "")break;
+	//表示・確認
+	for (int i = 0; i < answer.size(); i++) {
+		std::cout << answer.at(i) << "\n";
+		if (answer.at(i) == "")break;
 	}
 
 	return true;
@@ -110,5 +125,5 @@ BOOST_AUTO_TEST_CASE(test_division)
 
 BOOST_AUTO_TEST_CASE(test_HarfSize)
 {
-	BOOST_REQUIRE(parse("１+2"));
+	BOOST_REQUIRE(parse("6*(3-1)/2"));
 }
